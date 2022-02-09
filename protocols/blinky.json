@@ -1,0 +1,9 @@
+[
+    {
+        "graduation": {},
+        "pulse_duration": 100,
+        "pulse_interval": 500,
+        "step_name": "Blink",
+        "task_type": "Blink"
+    }
+]

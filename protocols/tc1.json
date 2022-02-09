@@ -1,0 +1,73 @@
+[
+    {
+        "graduation": {
+            "type": "NTrials",
+            "value": {
+                "current_trial": "1",
+                "n_trials": "1000000000000000000000000",
+                "type": "NTrials"
+            }
+        },
+        "inter_stimulus_interval": 500,
+        "step_name": "TuningCurve",
+        "stim": {
+            "sounds": {
+                "L": [
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "1000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "2000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "3000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "4000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "5000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "6000",
+                        "type": "Tone"
+                    },
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "7000",
+                        "type": "Tone"
+                    }
+                ],
+                "R": [
+                    {
+                        "amplitude": ".01",
+                        "duration": "100",
+                        "frequency": "500",
+                        "type": "Tone"
+                    }
+                ]
+            },
+            "tag": "Sounds",
+            "type": "sounds"
+        },
+        "task_type": "TuningCurve"
+    }
+]

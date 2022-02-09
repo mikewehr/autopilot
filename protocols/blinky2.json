@@ -1,0 +1,17 @@
+[
+    {
+        "graduation": {
+            "type": "NTrials",
+            "value": {
+                "current_trial": "1",
+                "n_trials": "10000000",
+                "threshold": "1",
+                "type": "NTrials"
+            }
+        },
+        "pulse_duration": 100,
+        "pulse_interval": 500,
+        "step_name": "Blink",
+        "task_type": "Blink"
+    }
+]

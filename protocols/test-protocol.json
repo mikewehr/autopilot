@@ -1,0 +1,34 @@
+[
+    {
+        "bias_mode": false,
+        "correction": false,
+        "graduation": {},
+        "punish_stim": false,
+        "req_reward": false,
+        "reward": 10,
+        "step_name": "Nafc",
+        "stim": {
+            "sounds": {
+                "L": [
+                    {
+                        "amplitude": ".5",
+                        "duration": "100",
+                        "frequency": "1000",
+                        "type": "Tone"
+                    }
+                ],
+                "R": [
+                    {
+                        "amplitude": ".5",
+                        "duration": "100",
+                        "frequency": "2000",
+                        "type": "Tone"
+                    }
+                ]
+            },
+            "tag": "Sounds",
+            "type": "sounds"
+        },
+        "task_type": "Nafc"
+    }
+]

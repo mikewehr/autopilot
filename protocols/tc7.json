@@ -1,0 +1,37 @@
+[
+    {
+        "graduation": {
+            "type": "NTrials",
+            "value": {
+                "current_trial": "1",
+                "n_trials": "9999",
+                "type": "NTrials"
+            }
+        },
+        "inter_stimulus_interval": 500,
+        "step_name": "TuningCurve",
+        "stim": {
+            "sounds": {
+                "L": [
+                    {
+                        "amplitude": ".05",
+                        "duration": "100",
+                        "frequency": "1000",
+                        "type": "Tone"
+                    }
+                ],
+                "R": [
+                    {
+                        "amplitude": ".05",
+                        "duration": "100",
+                        "frequency": "500",
+                        "type": "Tone"
+                    }
+                ]
+            },
+            "tag": "Sounds",
+            "type": "sounds"
+        },
+        "task_type": "TuningCurve"
+    }
+]
