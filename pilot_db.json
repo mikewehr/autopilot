@@ -1,6 +1,8 @@
 {
     "mesopi": {
-        "subjects": [],
+        "subjects": [
+            "s1"
+        ],
         "ip": "192.168.0.197",
         "prefs": {
             "AGENT": "PILOT",
