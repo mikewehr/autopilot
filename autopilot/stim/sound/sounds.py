@@ -48,6 +48,7 @@ import numpy as np
 import threading
 from itertools import cycle
 from queue import Empty, Full
+import pdb
 
 from autopilot import prefs
 from autopilot.stim.sound.base import get_sound_class, Sound
@@ -60,15 +61,16 @@ BASE_CLASS = get_sound_class()
 class Tone(BASE_CLASS):
     """The Humble Sine Wave"""
 
-    PARAMS = ['frequency','duration','amplitude']
+    PARAMS = ['frequency','duration','amplitude', 'ramp']
     type = 'Tone'
 
-    def __init__(self, frequency, duration, amplitude=0.01, **kwargs):
+    def __init__(self, frequency, duration, amplitude=0.01, ramp=3, **kwargs):
         """
         Args:
             frequency (float): frequency of sin in Hz
             duration (float): duration of the sin in ms
             amplitude (float): amplitude of the sound as a proportion of 1.
+            ramp (float): length (in ms) of rising/falling cos-squared ramp to apply to the tone
             **kwargs: extraneous parameters that might come along with instantiating us
         """
         super(Tone, self).__init__(**kwargs)
@@ -76,6 +78,7 @@ class Tone(BASE_CLASS):
         self.frequency = float(frequency)
         self.duration = float(duration)
         self.amplitude = float(amplitude)
+        self.ramp = float(ramp)
 
         self.init_sound()
 
@@ -91,11 +94,29 @@ class Tone(BASE_CLASS):
             self.get_nsamples()
             t = np.arange(self.nsamples)
             self.table = (self.amplitude*np.sin(2*np.pi*self.frequency*t/self.fs)).astype(np.float32)
+            self.apply_ramp()
             #self.table = np.column_stack((self.table, self.table))
             if self.server_type == 'jack':
                 self.chunk()
 
         self.initialized = True
+
+    def apply_ramp(self)
+        """
+        generate a rising/falling cosine-squared edge and apply it to the tone
+        ramp (in ms) is the duration from 10% to 90% of tone amplitude
+        """
+        #pdb.set_trace()
+
+        omega = (1000/self.ramp)*(acos(sqrt(0.1)) - acos(sqrt(0.9)))
+        dt=1/self.fs
+        t=np.arange(dt, pi/2/omega + dt, dt)
+        Redge=(cos(omega*t))**2
+        Ledge=np.fliplr(Redge)
+        self.table(0:len(Ledge)) = self.table(0:len(Ledge)-1)*Ledge
+        self.table((len(self.table)-len(Redge)):len(self.table)-1) = self.table((len(self.table)-len(Redge)):len(self.table)-1)*Redge
+
+
 
 class Noise(BASE_CLASS):
     """Generates a white noise burst with specified parameters
@@ -192,6 +213,32 @@ class Noise(BASE_CLASS):
 
         # Flag as initialized
         self.initialized = True
+
+    def iter_continuous(self) -> typing.Generator:
+        """
+        Continuously yield frames of audio. If this method is not overridden,
+        just wraps :attr:`.table` in a :class:`itertools.cycle` object and
+        returns from it.
+
+        Returns:
+            np.ndarray: A single frame of audio
+        """
+        # preallocate
+        if self.channel is None:
+            table = np.empty(self.blocksize, dtype=np.float32)
+        else:
+            table = np.empty((self.blocksize, 2), dtype=np.float32)
+
+        rng = np.random.default_rng()
+
+
+        while True:
+            if self.channel is None:
+                table[:] = rng.uniform(-self.amplitude, self.amplitude, self.blocksize)
+            else:
+                table[:,self.channel] = rng.uniform(-self.amplitude, self.amplitude, self.blocksize)
+
+            yield table
 
 class File(BASE_CLASS):
     """
