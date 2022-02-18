@@ -80,6 +80,9 @@ class Tone(BASE_CLASS):
         self.amplitude = float(amplitude)
         self.ramp = float(ramp)
 
+        self.logger = init_logger(self)
+
+
         self.init_sound()
 
     def init_sound(self):
@@ -107,7 +110,7 @@ class Tone(BASE_CLASS):
         ramp (in ms) is the duration from 10% to 90% of tone amplitude
         """
         #pdb.set_trace()
-
+        self.logger.debug('applying ramp...')
         omega = (1000/self.ramp)*(acos(sqrt(0.1)) - acos(sqrt(0.9)))
         dt=1/self.fs
         t=np.arange(dt, pi/2/omega + dt, dt)
@@ -115,6 +118,8 @@ class Tone(BASE_CLASS):
         Ledge=np.fliplr(Redge)
         self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
         self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
+        self.logger.debug('ramp applied')
+
 
 
 class Noise(BASE_CLASS):
