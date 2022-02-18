@@ -527,6 +527,7 @@ class Terminal(QtWidgets.QMainWindow):
         """
         # stopping is the enemy of starting so we put them in the same function to learn about each other
         if starting is True:
+            """
             # Get Weights
             start_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Starting Weight",
                                                             "Starting Weight:")
@@ -569,7 +570,7 @@ class Terminal(QtWidgets.QMainWindow):
             else:
                 # pressed cancel
                 return
-
+            """
 
     ############################
     # MESSAGE HANDLING METHODS
