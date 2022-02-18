@@ -100,6 +100,7 @@ class Tone(BASE_CLASS):
                 self.chunk()
 
         self.initialized = True
+        
 
 
     def apply_ramp(self):
