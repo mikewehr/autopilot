@@ -109,15 +109,15 @@ class Tone(BASE_CLASS):
         generate a rising/falling cosine-squared edge and apply it to the tone
         ramp (in ms) is the duration from 10% to 90% of tone amplitude
         """
-        #pdb.set_trace()
         self.logger.debug('applying ramp...')
         omega = (1000/self.ramp)*(math.acos(math.sqrt(0.1)) - math.acos(math.sqrt(0.9)))
         dt=1/self.fs
         t=np.arange(dt, np.pi/2/omega + dt, dt)
         Redge=(np.cos(omega*t))**2
-        self.logger.debug(f"t size {np.shape(t)}")
-        self.logger.debug(f"Redge size {np.shape(Redge)}")
         Ledge=np.flipud(Redge)
+        self.logger.debug(f"len Ledge  {len(Ledge)}")
+        self.logger.debug(f"Redge size {np.shape(Redge)}")
+        pdb.set_trace()
         self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
         self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
         self.logger.debug('ramp applied')
