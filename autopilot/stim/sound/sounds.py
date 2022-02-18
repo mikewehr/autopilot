@@ -101,7 +101,7 @@ class Tone(BASE_CLASS):
 
         self.initialized = True
 
-    def apply_ramp(self)
+    def apply_ramp(self):
         """
         generate a rising/falling cosine-squared edge and apply it to the tone
         ramp (in ms) is the duration from 10% to 90% of tone amplitude
@@ -113,9 +113,8 @@ class Tone(BASE_CLASS):
         t=np.arange(dt, pi/2/omega + dt, dt)
         Redge=(cos(omega*t))**2
         Ledge=np.fliplr(Redge)
-        self.table(0:len(Ledge)) = self.table(0:len(Ledge)-1)*Ledge
-        self.table((len(self.table)-len(Redge)):len(self.table)-1) = self.table((len(self.table)-len(Redge)):len(self.table)-1)*Redge
-
+        self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
+        self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
 
 
 class Noise(BASE_CLASS):
