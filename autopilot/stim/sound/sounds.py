@@ -49,6 +49,7 @@ import threading
 from itertools import cycle
 from queue import Empty, Full
 import pdb
+import math
 
 from autopilot import prefs
 from autopilot.stim.sound.base import get_sound_class, Sound
@@ -110,7 +111,7 @@ class Tone(BASE_CLASS):
         """
         #pdb.set_trace()
         self.logger.debug('applying ramp...')
-        omega = (1000/self.ramp)*(acos(sqrt(0.1)) - acos(sqrt(0.9)))
+        omega = (1000/self.ramp)*(math.acos(sqrt(0.1)) - acos(sqrt(0.9)))
         dt=1/self.fs
         t=np.arange(dt, pi/2/omega + dt, dt)
         Redge=(cos(omega*t))**2
