@@ -80,8 +80,6 @@ class Tone(BASE_CLASS):
         self.amplitude = float(amplitude)
         self.ramp = float(ramp)
 
-        self.logger = init_logger(self)
-
 
         self.init_sound()
 
