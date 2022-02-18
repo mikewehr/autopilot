@@ -112,11 +112,10 @@ class Tone(BASE_CLASS):
         #pdb.set_trace()
         self.logger.debug('applying ramp...')
         omega = (1000/self.ramp)*(math.acos(math.sqrt(0.1)) - math.acos(math.sqrt(0.9)))
-        self.logger.debug(f"omega {omega}")
         dt=1/self.fs
         t=np.arange(dt, np.pi/2/omega + dt, dt)
-        Redge=(np.cos(omega*t))
         Redge=(np.cos(omega*t))**2
+        self.logger.debug(f"redge {shape(Redge)}")
         Ledge=np.fliplr(Redge)
         self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
         self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
