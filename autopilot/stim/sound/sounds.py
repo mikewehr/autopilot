@@ -41,7 +41,7 @@ The behavior of this module depends on `prefs.get('AUDIOSERVER')`.
 import os
 import sys
 import typing
-from time import sleep
+from time import sleep, time
 from scipy.io import wavfile
 from scipy.signal import resample
 import numpy as np
@@ -101,42 +101,43 @@ class Tone(BASE_CLASS):
 
         self.initialized = True
 
-    def apply_ramp(self)
+
+    def apply_ramp(self):
         """
         generate a rising/falling cosine-squared edge and apply it to the tone
         ramp (in ms) is the duration from 10% to 90% of tone amplitude
         """
         #pdb.set_trace()
-
+        self.logger.debug('applying ramp...')
         omega = (1000/self.ramp)*(acos(sqrt(0.1)) - acos(sqrt(0.9)))
         dt=1/self.fs
         t=np.arange(dt, pi/2/omega + dt, dt)
         Redge=(cos(omega*t))**2
         Ledge=np.fliplr(Redge)
-        self.table(0:len(Ledge)) = self.table(0:len(Ledge)-1)*Ledge
-        self.table((len(self.table)-len(Redge)):len(self.table)-1) = self.table((len(self.table)-len(Redge)):len(self.table)-1)*Redge
-
+        self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
+        self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
+        self.logger.debug('ramp applied')
 
 
 class Noise(BASE_CLASS):
     """Generates a white noise burst with specified parameters
-    
+
     The `type` attribute is always "Noise".
     """
     # These are the parameters of the sound, I think this is used to generate
     # sounds automatically for a protocol
     PARAMS = ['duration','amplitude', 'channel']
-    
+
     # The type of the sound
     type='Noise'
-    
+
     def __init__(self, duration, amplitude=0.01, channel=None, **kwargs):
         """Initialize a new white noise burst with specified parameters.
-        
+
         The sound itself is stored as the attribute `self.table`. This can
         be 1-dimensional or 2-dimensional, depending on `channel`. If it is
         2-dimensional, then each channel is a column.
-        
+
         Args:
             duration (float): duration of the noise
             amplitude (float): amplitude of the sound as a proportion of 1.
@@ -149,7 +150,7 @@ class Noise(BASE_CLASS):
         # This calls the base class, which sets server-specific parameters
         # like samplign rate
         super(Noise, self).__init__(**kwargs)
-        
+
         # Set the parameters specific to Noise
         self.duration = float(duration)
         self.amplitude = float(amplitude)
@@ -157,7 +158,7 @@ class Noise(BASE_CLASS):
             self.channel = int(channel)
         except TypeError:
             self.channel = channel
-        
+
         # Currently only mono or stereo sound is supported
         if self.channel not in [None, 0, 1]:
             raise ValueError(
@@ -168,11 +169,11 @@ class Noise(BASE_CLASS):
         self.init_sound()
 
     def init_sound(self):
-        """Defines `self.table`, the waveform that is played. 
-        
+        """Defines `self.table`, the waveform that is played.
+
         The way this is generated depends on `self.server_type`, because
         parameters like the sampling rate cannot be known otherwise.
-        
+
         The sound is generated and then it is "chunked" (zero-padded and
         divided into chunks). Finally `self.initialized` is set True.
         """
@@ -180,13 +181,13 @@ class Noise(BASE_CLASS):
         if self.server_type == 'pyo':
             noiser = pyo.Noise(mul=self.amplitude)
             self.table = self.table_wrap(noiser)
-        
+
         elif self.server_type in ('jack', 'dummy'):
-            # This calculates the number of samples, using the specified 
+            # This calculates the number of samples, using the specified
             # duration and the sampling rate from the server, and stores it
             # as `self.nsamples`.
             self.get_nsamples()
-            
+
             # Generate the table by sampling from a uniform distribution
             # The shape of the table depends on `self.channel`
             if self.channel is None:
@@ -200,13 +201,13 @@ class Noise(BASE_CLASS):
                 self.table = np.zeros((self.nsamples, 2))
                 assert self.channel in [0, 1]
                 self.table[:, self.channel] = data
-            
+
             # Scale by the amplitude
             self.table = self.table * self.amplitude
-            
+
             # Convert to float32
             self.table = self.table.astype(np.float32)
-            
+
             # Chunk the sound
             if self.server_type == 'jack':
                 self.chunk()

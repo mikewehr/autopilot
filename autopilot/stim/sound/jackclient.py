@@ -213,7 +213,7 @@ class JackClient(mp.Process):
 
         This is the interpretation of OUTCHANNELS:
         * empty string
-            'mono' audio: the same sound is always played to all channels. 
+            'mono' audio: the same sound is always played to all channels.
             Connect a single virtual outport to every physical channel.
             If multi-channel sound is provided, raise an error.
         * a single int (example: J)
@@ -224,17 +224,17 @@ class JackClient(mp.Process):
         * a list (example: [I, J])
             The first virtual outport will be connected to physical channel I.
             The second virtual outport will be connected to physical channel J.
-            And so on.    
+            And so on.
             If 1-dimensional sound is provided, play the same to all speakers
             (like mono mode).
             If multi-channel sound is provided and the number of channels
-            is different form the length of this list, raise an error.        
+            is different form the length of this list, raise an error.
 
         :class:`jack.Client` s can't be kept alive, so this must be called just before
         processing sample starts.
         """
         ## Parse OUTCHANNELS into listified_outchannels and set `self.mono_output`
-        
+
         # This generates `listified_outchannels`, which is always a list
         # It also sets `self.mono_output` if outchannels is None
         if self.outchannels == '':
@@ -249,14 +249,14 @@ class JackClient(mp.Process):
             # Already a list
             listified_outchannels = self.outchannels
             self.mono_output = False
-        
+
         ## Initalize self.client
         # Initalize a new Client and store some its properties
         # I believe this is how downstream code knows the sample rate
         self.client = jack.Client(self.name)
         self.blocksize = self.client.blocksize
         self.fs = self.client.samplerate
-        
+
         # This is used for writing silence
         self.zero_arr = np.zeros((self.blocksize,1),dtype='float32')
 
@@ -278,7 +278,7 @@ class JackClient(mp.Process):
         self.client.activate()
         self.logger.debug('client activated')
 
-        
+
         ## Hook up the outports (data sinks) to physical ports
         # Get the actual physical ports that can play sound
         target_ports = self.client.get_ports(
@@ -290,7 +290,7 @@ class JackClient(mp.Process):
             # Hook up one outport to all channels
             for target_port in target_ports:
                 self.client.outports[0].connect(target_port)
-        
+
         else:
             ## Not mono mode
             # Error check
@@ -299,16 +299,16 @@ class JackClient(mp.Process):
                     "cannot connect {} ports, only {} available".format(
                     len(listified_outchannels),
                     len(target_ports),))
-            
+
             # Hook up one outport to each channel
             for n in range(len(listified_outchannels)):
                 # This is the channel number the user provided in OUTCHANNELS
                 index_of_physical_channel = listified_outchannels[n]
-                
+
                 # This is the corresponding physical channel
                 # I think this will always be the same as index_of_physical_channel
                 physical_channel = target_ports[index_of_physical_channel]
-                
+
                 # Connect virtual outport to physical channel
                 self.client.outports[n].connect(physical_channel)
 
@@ -359,7 +359,7 @@ class JackClient(mp.Process):
         if not self.play_evt.is_set():
             # A play event has not been set
             # Play only if we are in continuous mode, otherwise write zeros
-            
+
             ## Switch on whether we are in continuous mode
             if self.continuous.is_set():
                 # We are in continuous mode, keep playing
@@ -384,7 +384,7 @@ class JackClient(mp.Process):
 
                 # Get the data to play
                 data = next(self.continuous_cycle).T
-                
+
                 # Write
                 self.write_to_outports(data)
 
@@ -397,7 +397,7 @@ class JackClient(mp.Process):
 
                 # Play zeros
                 data = self.zero_arr.T
-                
+
                 # Write
                 self.write_to_outports(data)
 
@@ -439,7 +439,7 @@ class JackClient(mp.Process):
                 # Thread(target=self._wait_for_end, args=(self.client.last_frame_time+self.blocksize,)).start()
                 if self.debug_timing:
                     self.logger.debug(f'Sound has ended, requesting end event at {self.wait_until}')
-                
+
             else:
                 ## There is data available
                 if data.shape[0] < self.blocksize:
@@ -459,16 +459,16 @@ class JackClient(mp.Process):
             if self.querythread is None:
                 self.querythread = Thread(target=self._wait_for_end)
                 self.querythread.start()
-    
+
     def write_to_outports(self, data):
         """Write the sound in `data` to the outport(s).
-        
+
         If self.mono_output:
             If data is 1-dimensional:
                 Write that data to the single outport, which goes to all
                 speakers.
             Otherwise, raise an error.
-        
+
         If not self.mono_output:
             If data is 1-dimensional:
                 Write that data to every outport
@@ -485,13 +485,13 @@ class JackClient(mp.Process):
                 # Write data to one outport, which is hooked up to all channels
                 buff = self.client.outports[0].get_array()
                 buff[:] = data
-            
+
             else:
                 # Stereo data provided, this is an error
                 raise ValueError(
                     "pref OUTCHANNELS indicates mono mode, but "
                     "data has shape {}".format(data.shape))
-            
+
         else:
             ## Multi-channel mode - Write a column to each channel
             if data.ndim == 1:
@@ -500,7 +500,7 @@ class JackClient(mp.Process):
                 for outport in self.client.outports:
                     buff = outport.get_array()
                     buff[:] = data
-                
+
             elif data.ndim == 2:
                 ## Multi-channel sound provided
                 # Error check
@@ -509,12 +509,12 @@ class JackClient(mp.Process):
                         "data has {} channels "
                         "but only {} outports in pref OUTCHANNELS".format(
                         data.shape[1], len(self.client.outports)))
-                
+
                 # Write one column to each channel
                 for n_outport, outport in enumerate(self.client.outports):
                     buff = outport.get_array()
                     buff[:] = data[:, n_outport]
-                
+
             else:
                 ## What would a 3d sound even mean?
                 raise ValueError(

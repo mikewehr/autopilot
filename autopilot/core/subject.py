@@ -18,6 +18,7 @@ import pandas as pd
 import warnings
 import typing
 import warnings
+from pathlib import Path
 from copy import copy
 import autopilot
 from autopilot import prefs
@@ -147,7 +148,11 @@ class Subject(object):
                 self.logger.warning('No Name attribute saved, trying to recover from filename')
                 self.name = os.path.splitext(os.path.split(file)[-1])[0]
 
-
+        # get last session number if we have it
+        try:
+            self.session = int(h5f.root.info._v_attrs['session'])
+        except KeyError:
+            self.session = None
 
         # If subject has a protocol, load it to a dict
         self.current = None
@@ -161,15 +166,32 @@ class Subject(object):
             self.current = json.loads(protocol_string)
             self.step = int(current_node.attrs['step'])
             self.protocol_name = current_node.attrs['protocol_name']
+
+            # if we can find a protocol file, compare it and update if changed
+            prot_file = Path(prefs.get('PROTOCOLDIR')) / (self.protocol_name + '.json')
+            if prot_file.exists():
+                try:
+                    with open(prot_file, 'r') as prot_f:
+                        protocol = json.load(prot_f)
+
+                    if protocol != self.current:
+                        self.logger.warning("Protocol file changed since assignment! updating stored protocol")
+
+                        # make sure we still get the h5f reference back (god i hate this pattern why isn't this a decorator)
+                        try:
+                            self.close_hdf(h5f)
+                            self.assign_protocol(str(prot_file.absolute()), step_n=self.step)
+                        finally:
+                            h5f = self.open_hdf()
+                except Exception as e:
+                    self.logger.warning(f'Caught exception comparing protocol .json file with stored protocol, changes to protocol file will not be tracked automatically.\nGot exception:\n{e}')
+            else:
+                self.logger.warning(f'Could not find protocol .json file to compare with stored protocol, expected to find {prot_file.absolute()}')
+
+
         elif not new:
             # if we're not being created for the first time, warn that there is no protocol assigned to the subject
             self.logger.warning('Subject has no protocol assigned!')
-
-        # get last session number if we have it
-        try:
-            self.session = int(h5f.root.info._v_attrs['session'])
-        except KeyError:
-            self.session = None
 
         # We will get handles to trial and continuous data when we start running
         self.current_trial  = None
@@ -745,7 +767,6 @@ class Subject(object):
 
                 if grad_obj.COLS:
                     # these are columns in our trial table
-
                     # then give the data to the graduation object
                     for col in grad_obj.COLS:
                         try:

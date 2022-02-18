@@ -73,12 +73,19 @@ class Task(object):
 
         STAGE_NAMES (list): List of stage method names
         stage_block (:class:`threading.Event`): Signal when task stages complete.
+        punish_block (:class:`threading.Event`): Event to mark when punishment is occuring
+        trigger_lock (:class:`threading.Lock`): Lock calls to triggers while they are being computed by stage methods.
+            Typically acquired at the beginning of a stage method and released at the end, most important when inheriting
+            task classes as the parent method will complete and make the `triggers` dictionary available to the
+            `handle_trigger` method. The `handle_trigger` method will check if the lock is released (unblocking):
+            if it is locked, then proceed doing nothing (the trigger is not yet valid to call), if it is unlocked,
+            do nothing.
         punish_stim (bool): Do a punishment stimulus
         stages (iterator): Some generator or iterator that continuously returns the next stage method of a trial
         triggers (dict): Some mapping of some pin to callback methods
         pins (dict): Dict to store references to hardware
         pin_id (dict): Reverse dictionary, pin numbers back to pin letters.
-        punish_block (:class:`threading.Event`): Event to mark when punishment is occuring
+
         logger (:class:`logging.Logger`): gets the 'main' logger for now.
     """
     # dictionary of Params needed to define task,
@@ -269,13 +276,15 @@ class Task(object):
         except KeyError:
             # If we don't have a trigger, that's fine, eg. L and R before requesting
             return
+        finally:
+            # clear triggers
+            self.triggers = {}
 
-        # clear triggers
-        self.triggers = {}
-        self.trigger_lock.release()
+            # clear the trigger lock (which we shoudl have acquired above successfully if we reached this far)
+            self.trigger_lock.release()
 
-        # Set the stage block so the pilot calls the next stage
-        self.stage_block.set()
+            # Set the stage block so the pilot calls the next stage
+            self.stage_block.set()
 
     def set_leds(self, color_dict=None):
         """
@@ -322,6 +331,8 @@ class Task(object):
                 del self.stim_manager
 
         del self.hardware
+
+        self.logger.info('stopped task')
 
 
 

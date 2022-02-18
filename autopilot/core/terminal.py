@@ -19,6 +19,7 @@ from PySide2 import QtCore, QtGui, QtSvg, QtWidgets
 
 from autopilot import prefs
 from autopilot.core import styles
+import time
 
 if __name__ == '__main__':
     # Parse arguments - this should have been called with a .json prefs file passed
@@ -526,6 +527,7 @@ class Terminal(QtWidgets.QMainWindow):
         """
         # stopping is the enemy of starting so we put them in the same function to learn about each other
         if starting is True:
+            
             # Get Weights
             #start_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Starting Weight",
             #                                                "Starting Weight:")
@@ -569,7 +571,7 @@ class Terminal(QtWidgets.QMainWindow):
             else:
                 # pressed cancel
                 return
-
+            
 
     ############################
     # MESSAGE HANDLING METHODS
@@ -592,8 +594,12 @@ class Terminal(QtWidgets.QMainWindow):
         subject_name = value['subject']
         self.subjects[subject_name].save_data(value)
         if self.subjects[subject_name].did_graduate.is_set() is True:
+            self.logger.info(f'Graduating subject {subject_name}')
             self.node.send(to=value['pilot'], key="STOP", value={'graduation':True})
             self.subjects[subject_name].stop_run()
+            #adding sleep to debug graduation hiccups -mike
+            self.logger.debug('subject graduated. Stopping run, sleep(1), graduating, and preparing next run')
+            time.sleep(1)    
             self.subjects[subject_name].graduate()
             task = self.subjects[subject_name].prepare_run()
             task['pilot'] = value['pilot']
@@ -751,13 +757,16 @@ class Terminal(QtWidgets.QMainWindow):
         # open objects if not already
         for subject in subjects:
             if subject not in self.subjects.keys():
-                self.subjects[subject] = Subject(subject)
+                try:
+                    self.subjects[subject] = Subject(subject)
+                except Exception as e:
+                    self.logger.exception(f"Could not instantiate subject {subject}, got exception:\n{e}")
 
         # for each subject, get weight
         weights = []
-        for subject in subjects:
-            weight = self.subjects[subject].get_weight(include_baseline=True)
-            weight['subject'] = subject
+        for subject_name, subject in self.subjects.items():
+            weight = subject.get_weight(include_baseline=True)
+            weight['subject'] = subject_name
             weights.append(weight)
 
         self.weight_widget = Weights(weights, self.subjects)
@@ -767,6 +776,7 @@ class Terminal(QtWidgets.QMainWindow):
         """
         If we change the protocol file, update the stored version in subject files
         """
+        self.logger.warning('The Subject class now updates the saved protocol when a change is sensed, this method is now unnecessary and will be removed.')
         #
         # get list of protocol files
         protocols = os.listdir(prefs.get('PROTOCOLDIR'))
@@ -805,6 +815,7 @@ class Terminal(QtWidgets.QMainWindow):
             subject_protocols = reassign_window.subjects
 
             for subject, protocol in subject_protocols.items():
+
                 step = protocol[1]
                 protocol = protocol[0]
 
