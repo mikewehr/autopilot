@@ -116,6 +116,7 @@ class Tone(BASE_CLASS):
         dt=1/self.fs
         t=np.arange(dt, np.pi/2/omega + dt, dt)
         Redge=(math.cos(omega*t))**2
+        Redge=(math.cos(omega*t))
         Ledge=np.fliplr(Redge)
         self.table[0:len(Ledge)-1] = self.table[0:len(Ledge)-1]*Ledge
         self.table[(len(self.table)-len(Redge)):len(self.table)-1] = self.table[(len(self.table)-len(Redge)):len(self.table)-1]*Redge
