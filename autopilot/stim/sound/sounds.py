@@ -111,6 +111,7 @@ class Tone(BASE_CLASS):
         """
         self.logger.debug('applying ramp...')
         omega = (1000/self.ramp)*(math.acos(math.sqrt(0.1)) - math.acos(math.sqrt(0.9)))
+        self.logger.debug(f"omega:  {omega}")
         dt=1/self.fs
         t=np.arange(dt, omega*np.pi*0.5 + dt, dt)
         Redge=(np.cos(omega*t))**2
