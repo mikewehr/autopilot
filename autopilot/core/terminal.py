@@ -527,18 +527,19 @@ class Terminal(QtWidgets.QMainWindow):
         """
         # stopping is the enemy of starting so we put them in the same function to learn about each other
         if starting is True:
-            """
+            
             # Get Weights
-            start_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Starting Weight",
-                                                            "Starting Weight:")
-            if ok:
+            #start_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Starting Weight",
+            #                                                "Starting Weight:")
+            
+            if True:
                 # Ope'nr up if she aint
                 if subject not in self.subjects.keys():
                     self.subjects[subject] = Subject(subject)
 
                 task = self.subjects[subject].prepare_run()
                 task['pilot'] = pilot
-                self.subjects[subject].update_weights(start=float(start_weight))
+                #self.subjects[subject].update_weights(start=float(start_weight))
 
                 self.node.send(to=pilot, key="START", value=task)
                 # also let the plot know to start
@@ -550,10 +551,10 @@ class Terminal(QtWidgets.QMainWindow):
 
         else:
             # Get Weights
-            stop_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Stopping Weight",
-                                                           "Stopping Weight:")
+            #stop_weight, ok = QtWidgets.QInputDialog.getDouble(self, "Set Stopping Weight",
+            #                                               "Stopping Weight:")
             
-            if ok:
+            if True:
                 # Send message to pilot to stop running,
                 # it should initiate a coherence checking routine to make sure
                 # its data matches what the Terminal got,
@@ -565,12 +566,12 @@ class Terminal(QtWidgets.QMainWindow):
                 # TODO: Auto-select the next subject in the list.
 
                 self.subjects[subject].stop_run()
-                self.subjects[subject].update_weights(stop=float(stop_weight))
+                #self.subjects[subject].update_weights(stop=float(stop_weight))
 
             else:
                 # pressed cancel
                 return
-            """
+            
 
     ############################
     # MESSAGE HANDLING METHODS
