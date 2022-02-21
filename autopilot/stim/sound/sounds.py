@@ -109,7 +109,7 @@ class Tone(BASE_CLASS):
         generate a rising/falling cosine-squared edge and apply it to the tone
         ramp (in ms) is the duration from 10% to 90% of tone amplitude
         """
-        self.logger.debug(f'applying {ramp} ms ramp...')
+        self.logger.debug(f'applying {self.ramp} ms ramp...')
         omega = (1000/self.ramp)*(math.acos(math.sqrt(0.1)) - math.acos(math.sqrt(0.9)))
         self.logger.debug(f"omega:  {omega}")
         dt=1/self.fs
