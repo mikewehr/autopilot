@@ -117,7 +117,7 @@ class Tone(BASE_CLASS):
         Redge=(np.cos(omega*t))**2
         Ledge=np.flipud(Redge)
         self.logger.debug(f"len Ledge  {len(Ledge)}")
-        #pdb.set_trace()
+        pdb.set_trace()
         self.table[0:len(Ledge)] = self.table[0:len(Ledge)]*Ledge
         self.table[(len(self.table)-len(Redge)):len(self.table)] = self.table[(len(self.table)-len(Redge)):len(self.table)]*Redge
         self.logger.debug('ramp applied')
